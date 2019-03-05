@@ -91,6 +91,9 @@ interface HttpRequest {
     getMethod() : string;
     /** Returns the part of URL after ? sign or empty string. */
     getQuery() : string;
+
+    /** Returns the request headers as a map where the key is the header and the value is the header value. */
+    getHeaders(): Map<string, string>;
 }
 
 /** A structure holding settings and handlers for a WebSocket route handler. */

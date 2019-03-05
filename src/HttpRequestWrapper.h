@@ -52,6 +52,22 @@ struct HttpRequestWrapper {
         }
     }
 
+    static void req_getHeaders(const FunctionCallbackInfo<Value> &args) {
+        auto *req = getHttpRequest(args);
+        if (req) {
+            std::map<std::string_view, std::string_view> _headers = req->getHeaders();
+
+            Local<Context> ctx = isolate->GetCurrentContext();
+            Local<Map> headers = Map::New(ctx->GetIsolate());
+
+            for (auto const& entry : _headers) {
+                headers->Set(ctx, String::NewFromUtf8(isolate, entry.first.data(), v8::String::kNormalString, entry.first.length()), String::NewFromUtf8(isolate, entry.second.data(), v8::String::kNormalString, entry.second.length())).ToLocalChecked();
+            }
+
+            args.GetReturnValue().Set(headers);
+        }
+    }
+
     /* Takes nothing, returns string */
     static void req_getMethod(const FunctionCallbackInfo<Value> &args) {
         auto *req = getHttpRequest(args);
@@ -79,6 +95,7 @@ struct HttpRequestWrapper {
 
         /* Register our functions */
         reqTemplateLocal->PrototypeTemplate()->Set(String::NewFromUtf8(isolate, "getHeader"), FunctionTemplate::New(isolate, req_getHeader));
+        reqTemplateLocal->PrototypeTemplate()->Set(String::NewFromUtf8(isolate, "getHeaders"), FunctionTemplate::New(isolate, req_getHeaders));
         reqTemplateLocal->PrototypeTemplate()->Set(String::NewFromUtf8(isolate, "getParameter"), FunctionTemplate::New(isolate, req_getParameter));
         reqTemplateLocal->PrototypeTemplate()->Set(String::NewFromUtf8(isolate, "getUrl"), FunctionTemplate::New(isolate, req_getUrl));
         reqTemplateLocal->PrototypeTemplate()->Set(String::NewFromUtf8(isolate, "getMethod"), FunctionTemplate::New(isolate, req_getMethod));
